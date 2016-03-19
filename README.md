@@ -7,10 +7,4 @@ Contiene anche il codice da eseguire sul server (*server.c*) e sul sensore LIDAR
 
 Richiede la libreria **rocket** ([link][rocket]) per stabilire un canale di comunicazione persistente e network-fault tolerant.
 
-Per compilare:
-
-```
-$ cc rocket.c if-buffer.c util.c -pthread -lcrypto
-```
-
 [rocket]: <https://github.com/ilDuna/rocket>
