@@ -4,8 +4,6 @@
  */
 #include <stdlib.h>
 
-#define ARG_MISSION		"mission"
-
 typedef enum {
 	MISSION_MC1,
 	MISSION_MC2,
