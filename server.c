@@ -14,6 +14,24 @@
 #define REDIS_IPADDRESS				"127.0.0.1"
 #define REDIS_PORT					6379
 
+#define MISSIONID                   "rm125"
+#define SENSORID                    "1"
+
+#define STR_MISSION_MC1             MISSIONID ":mission:mc1"
+#define STR_MISSION_MC2             MISSIONID ":mission:mc2"
+#define STR_SETTINGS_DAQ            MISSIONID ":" SENSORID ":settings:daq"
+#define STR_SETTINGS_CLEAR          MISSIONID ":" SENSORID ":settings:clear"
+#define STR_SETTINGS_HV             MISSIONID ":" SENSORID ":settings:hv"
+#define STR_SETTINGS_CHANNELS       MISSIONID ":" SENSORID ":settings:channels"
+#define STR_SETTINGS_LOCK           MISSIONID ":" SENSORID ":settings:lock"
+#define STR_SETTINGS_FPGA           MISSIONID ":" SENSORID ":settings:fpga"
+#define STR_SNAPSHOTS               MISSIONID ":" SENSORID ":snapshots"
+#define REDIS_SET_MISSION_MC1       "SET " STR_MISSION_MC1 " %b"
+#define REDIS_SET_MISSION_MC2       "SET " STR_MISSION_MC2 " %b"
+#define REDIS_SET_SNAPSHOTS         "SET " STR_SNAPSHOTS " %b"
+#define REDIS_PUBLISH_SNAPSHOTS     "PUBLISH " STR_SNAPSHOTS " %b"
+#define REDIS_MULTI_SUBSCRIBE       "SUBSCRIBE " STR_MISSION_MC1 STR_MISSION_MC2 STR_SETTINGS_DAQ STR_SETTINGS_CLEAR STR_SETTINGS_HV STR_SETTINGS_CHANNELS STR_SETTINGS_LOCK STR_SETTINGS_FPGA
+
 /* used to pass arguments to threads and callbacks */
 struct thread_arg {
     pthread_mutex_t *rocket_lock;
@@ -35,7 +53,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
         if (strcmp(reply->element[0]->str, "subscribe") == 0)
             return; /* ignore successful subscribtion */
         else {
-            if (strcmp(reply->element[1]->str, "rm125:mission:mc1") == 0) {
+            if (strcmp(reply->element[1]->str, STR_MISSION_MC1) == 0) {
                 lcop_msg *msg = lcop_new_msg(MISSION_MC1, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -43,7 +61,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:mission:mc2") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_MISSION_MC2) == 0) {
                 lcop_msg *msg = lcop_new_msg(MISSION_MC2, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -51,7 +69,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:daq") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_DAQ) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_DAQ, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -59,7 +77,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:clear") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_CLEAR) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_CLEAR, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -67,7 +85,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:hv") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_HV) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_HV, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -75,7 +93,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:channels") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_CHANNELS) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_CHANNELS, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -83,7 +101,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:lock") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_LOCK) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_LOCK, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -91,7 +109,7 @@ void subscribeCallback(redisAsyncContext *c, void *r, void *arg) {
                 pthread_mutex_unlock(lcop_lock);
                 lcop_free(msg);
             }
-            else if (strcmp(reply->element[1]->str, "rm125:1:settings:fpga") == 0) {
+            else if (strcmp(reply->element[1]->str, STR_SETTINGS_FPGA) == 0) {
                 lcop_msg *msg = lcop_new_msg(SETTINGS_FPGA, 
                     reply->element[2]->str, strlen(reply->element[2]->str));
                 pthread_mutex_lock(lcop_lock);
@@ -163,11 +181,11 @@ void *recv_thread(void *arg) {
 
         if (msg->type == MISSION_MC1) {
             redisAsyncCommand(c, NULL, NULL, 
-                "SET rm125:mission:mc1 %b", msg->payload, msg->paylength);
+                REDIS_SET_MISSION_MC1, msg->payload, msg->paylength);
         }
         else if (msg->type == MISSION_MC2) {
             redisAsyncCommand(c, NULL, NULL, 
-                "SET rm125:mission:mc2 %b", msg->payload, msg->paylength);
+                REDIS_SET_MISSION_MC2, msg->payload, msg->paylength);
         }
         else if (msg->type == SNAPSHOTS) {
             /*
@@ -176,8 +194,8 @@ void *recv_thread(void *arg) {
             int ret2 = redisAsyncCommand(c, NULL, NULL, 
                 "PUBLISH rm125:1:snapshots %b", msg->payload, msg->paylength);
                 */
-            redisCommand(sc, "PUBLISH rm125:1:snapshots %b", msg->payload, msg->paylength);
-            redisCommand(sc, "SET rm125:1:snapshots %b", msg->payload, msg->paylength);
+            redisCommand(sc, REDIS_PUBLISH_SNAPSHOTS, msg->payload, msg->paylength);
+            redisCommand(sc, REDIS_SET_SNAPSHOTS, msg->payload, msg->paylength);
         }
 
 		free(recvbuffer);
@@ -186,7 +204,7 @@ void *recv_thread(void *arg) {
 }
 
 int main(int argc, char **argv) {
-	pthread_mutex_t *rocket_lock = malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_t *rocket_lock = malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_t *lcop_lock = malloc(sizeof(pthread_mutex_t));
     pthread_mutex_init(rocket_lock, NULL);
     pthread_mutex_init(lcop_lock, NULL);
@@ -227,15 +245,7 @@ int main(int argc, char **argv) {
     pthread_create(&tid_recv, NULL, recv_thread, arg);
 
     /* subscribe to redis selected channels */
-    redisAsyncCommand(c, subscribeCallback, (struct thread_arg *)arg, "SUBSCRIBE \
-        rm125:mission:mc1 \
-        rm125:mission:mc2 \
-        rm125:1:settings:daq \
-        rm125:1:settings:clear \
-        rm125:1:settings:hv \
-        rm125:1:settings:channels \
-        rm125:1:settings:lock \
-        rm125:1:settings:fpga");
+    redisAsyncCommand(c, subscribeCallback, (struct thread_arg *)arg, REDIS_MULTI_SUBSCRIBE);
 
     /* start the libevent loop in order to receive async calls */
     event_base_dispatch(base);
