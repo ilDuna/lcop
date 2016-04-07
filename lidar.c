@@ -65,22 +65,22 @@ void *recv_thread(void *arg) {
             printf("[lcop]\t\tReceived a MISSION_MC2 pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_DAQ) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_DAQ pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_CLEAR) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_CLEAR pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_HV) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_HV pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_CHANNELS) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_CHANNELS pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_LOCK) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_LOCK pkt with payload: %s.\n", msg->payload);
         }
         else if (msg->type == SETTINGS_FPGA) {
-            
+            printf("[lcop]\t\tReceived a SETTINGS_FPGA pkt with payload: %s.\n", msg->payload);
         }
 
 		free(recvbuffer);
@@ -104,8 +104,35 @@ void *manager_thread(void *arg) {
         // do some things, schedule others...
         sleep(5);
 
-        char *test = "snapshots di prova";
-        lcop_msg *msg = lcop_new_msg(SNAPSHOTS, test, 18);
+        /* create the lcop snapshot message with a random value */
+        int length = 0;
+        char snapshotJSON[10240];
+        length = sprintf(snapshotJSON, "[{\"ch\":0,\"eq\":0,\"fc\":8,\"cc\":166,\"es\":1,\"msg\":\"FAIL: AD7 DAL BTP\",\"ec\":40,\"ms\":\"ERR=2106\"}, \
+{\"ch\":1,\"eq\":1,\"vq\":0.0,\"gq\":2500,\"rq\":300,\"es\":1,\"vs\":15.0,\"ss\":271,\"rs\":274,\"bs\":271}, \
+{\"ch\":2,\"eq\":1,\"vq\":0.0,\"gq\":2500,\"rq\":300,\"es\":1,\"vs\":14.7,\"ss\":284,\"rs\":278,\"bs\":284}, \
+{\"ch\":3,\"eq\":1,\"vq\":0.0,\"gq\":2500,\"rq\":300,\"es\":1,\"vs\":14.7,\"ss\":263,\"rs\":255,\"bs\":263}, \
+{\"ch\":4,\"eq\":1,\"vq\":0.0,\"gq\":2500,\"rq\":300,\"es\":1,\"vs\":14.9,\"ss\":387,\"rs\":375,\"bs\":386}\
+,\
+{\"gt\":0,\"dq\":%d,\"ds\":139.032,\"ec\":0,\"ms\":\"Ok, ERR=0\"}, \
+{\"gt\":1,\"dq\":2.336,\"wq\":356.667,\"ds\":2.336,\"ws\":356.667}, \
+{\"gt\":2,\"dq\":1.168,\"wq\":0.292,\"ds\":1.168,\"ws\":0.292}, \
+{\"gt\":3,\"dq\":0.584,\"wq\":1.460,\"ds\":0.584,\"ws\":1.460}, \
+{\"gt\":4,\"dq\":0.292,\"wq\":356.667,\"ds\":0.292,\"ws\":356.667}, \
+{\"gt\":5,\"dq\":1.372,\"wq\":0.146,\"ds\":1.372,\"ws\":0.146}, \
+{\"gt\":6,\"dq\":0.033,\"wq\":10.000,\"ds\":0.033,\"ws\":10.000}, \
+{\"gt\":7,\"dq\":140.000,\"wq\":10.000,\"ds\":140.000,\"ws\":10.000}\
+,\
+{\"ch\":0,\"msg\":\"Ok\",\"ec\":0,\"ms\":\"ERR=0\"}, \
+{\"ch\":1,\"eq\":0,\"nq\":1000.0,\"xq\":1200.0,\"tq\":100.0,\"sq\":1.00,\"hq\":400.00}, \
+{\"ch\":2,\"eq\":0,\"nq\":1000.0,\"xq\":1200.0,\"tq\":100.0,\"sq\":1.00,\"hq\":400.00}, \
+{\"ch\":3,\"eq\":0,\"nq\":1000.0,\"xq\":1200.0,\"tq\":100.0,\"sq\":1.00,\"hq\":400.00}, \
+{\"ch\":4,\"eq\":0,\"nq\":1000.0,\"xq\":1200.0,\"tq\":100.0,\"sq\":1.00,\"hq\":400.00}\
+,\
+{\"sts\":1,\"f\":\"/thisFolder/ThisFile.dat\",\"s\":1000}\
+]", rand()%140);
+
+        lcop_msg *msg = lcop_new_msg(SNAPSHOTS, snapshotJSON, length);
+
         pthread_mutex_lock(lcop_lock);
         lcop_queue_push(lcop_queue, msg);
         pthread_mutex_unlock(lcop_lock);
